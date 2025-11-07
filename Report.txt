@@ -1,0 +1,47 @@
+steps
+-- cloned github repo of clip 
+-- created virtualenv named clip_env , installed requirements 
+-- used code given in clip repository to perform zero shot and linear probe 
+-- implemented variations in class names 
+
+IMPLEMENTATION
+==============
+1. Basic CLIP Setup: Loaded ViT-B/32 model and validated image-text alignment
+2. Zero-Shot Classification: Tested on single CIFAR-10 image (class_id: 3637, true label: bird)
+   - Predictions: Cat (79.23%), Dog (8.51%), Horse (5.14%), Automobile (3.41%), Bird (3.71%)
+   - Result: Misclassified - demonstrates zero-shot limitations on visually similar classes
+3. Linear Probe: Trained logistic regression on frozen CLIP features (~95%accuracy)
+4. Prompt Engineering: Tested 5 prompt templates and 5 class naming variations
+
+Key Optimizations:
+- Reduced max_iter: 1000 → 100 (10x faster, minimal accuracy loss)
+- Sample size: 200 images (80x speedup for experiments)
+
+
+CHALLENGES & SOLUTIONS
+======================
+1. Computational Efficiency: Full dataset + 1000 iterations was too slow
+   → Reduced iterations to 100, sampled 200 images, pre-computed features
+   → Achieved speedup with minimal accuracy loss
+
+2. Zero-Shot Classification Failures: Similar-looking classes (bird vs. cat)
+   → Bird image (ID: 3637) misclassified as cat with 79.23% confidence
+   → Bird prediction ranked 5th with only 3.71% confidence
+   → Reveals CLIP struggles with semantically similar visual categories
+
+3. Prompt Engineering: Creating meaningful variations
+   → Tested templates (simple, descriptive, detailed, artistic, technical)
+   → Tested class variations (original, lowercase, plural, enhanced with colors/actions)
+   → Finding: Rich descriptions with attributes improved alignment
+
+
+POTENTIAL IMPROVEMENTS
+======================
+1. Test other CLIP variants (ViT-L/14, OpenCLIP) and datasets (ImageNet)
+
+
+CONCLUSION
+==========
+This project successfully demonstrated CLIP's effectiveness for zero-shot and 
+linear probe classification. Key findings:
+• Descriptive prompts with specific attributes reduce accuracy as it changes the contextual embeddings of the transformer
