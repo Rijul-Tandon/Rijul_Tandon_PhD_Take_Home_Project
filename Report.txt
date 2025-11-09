@@ -1,43 +1,66 @@
-steps
--- cloned github repo of clip 
--- created virtualenv named clip_env , installed requirements 
--- used code given in clip repository to perform zero shot and linear probe 
--- implemented variations in class names 
+================================================================================
+                  CLIP MODEL IMPLEMENTATION & PROMPT ENGINEERING REPORT
+================================================================================
 
-IMPLEMENTATION
-==============
-1. Basic CLIP Setup: Loaded ViT-B/32 model and validated image-text alignment
-2. Zero-Shot Classification: Tested on single CIFAR-10 image (class_id: 3637, true label: bird)
-3. Linear Probe: Trained logistic regression on frozen CLIP features (~95%accuracy)
-4. Prompt Engineering: Tested 5 prompt templates and 5 class naming variations
-
-Key Optimizations:
-- Reduced max_iter: 1000 → 100 (10x faster, minimal accuracy loss)
-- Sample size: 200 images (80x speedup for experiments)
+PROJECT SETUP
+=============
+- Cloned official CLIP GitHub repository
+- Created Python virtual environment (clip_env)
+- Installed required dependencies (torch, torchvision, clip, scikit-learn, etc.)
+- All implementation done in clip.ipynb
 
 
-CHALLENGES & SOLUTIONS
-======================
-1. Computational Efficiency: Full dataset + 1000 iterations was too slow
-   → Reduced iterations to 100
+WORKFLOW & IMPLEMENTATION
+==========================
 
-2. Zero-Shot Classification Failures: Similar-looking classes (bird vs. cat)
-   → Bird image (ID: 3637) misclassified as cat with 79.23% confidence
-   → Bird prediction ranked 5th with only 3.71% confidence
+Step 1: CLIP Setup & Initial Validation
+   - Loaded pre-trained ViT-B/32 CLIP model
+   - Tested on custom image (CLIP.png) with 3 candidate labels: ["a diagram", "a dog", "a cat"]
+   - Predicted probabilities: [99.27%, 0.42%, 0.30%] (correctly identified as diagram)
+   - Validated model's image-text alignment capability
 
-3. Prompt Engineering: Creating meaningful variations
-   → Tested templates (simple, descriptive, detailed, artistic, technical)
-   → Tested class variations (original, lowercase, plural, enhanced with colors/actions)
-   → Finding: Rich descriptions with attributes improved alignment
+Step 2: Zero-Shot Classification on Sample Images
+   - Tested on 4 CIFAR-10 images with indices: [3637, 1000, 5000, 85]
+   - Visualized images with predicted vs actual labels (4-panel grid)
+   - Displayed top-10 predictions for each image with confidence scores
+   - Demonstrated both successful and failed predictions
+   - Example: Bird (ID: 3637) misclassified as cat (79.23%) vs bird (3.71%)
+
+Step 3: Linear Probe on Full CIFAR-10
+   - Extracted frozen CLIP features from 50,000 training images
+   - Extracted frozen CLIP features from 10,000 test images
+   - Trained logistic regression classifier (C=0.316, max_iter=100)
+   - Test Accuracy: 95.00%
+   - Shows CLIP features are excellent for downstream classification
+
+Step 4: Zero-Shot on Full CIFAR-10
+   - Evaluated on all 10,000 test images without any training
+   - Computed text features for all 10 CIFAR-10 classes
+   - Matched image-text similarity for each test sample
+   - Test Accuracy: 88.80%
+   - Demonstrates strong transfer capability even without training
+   - Gap from linear probe: Only 6.2%
+
+Step 5: Prompt Engineering Analysis
+   - Tested 2 prompt templates:
+     * Simple: "a {}"
+     * Descriptive: "a photo of a {}"
+   - Tested 3 class name variations:
+     * Original (airplane, automobile, bird, cat, ...)
+     * Lowercase (airplane, automobile, bird, cat, ...)
+     * Plural (airplanes, automobiles, birds, cats, ...)
+   - Sample size: 200 images (80x speedup optimization)
+   - Result: Descriptive prompts outperformed simple templates
+   - Finding: "a photo of a {}" achieved higher accuracy than "a {}"
 
 
-POTENTIAL IMPROVEMENTS
-======================
-1. Test other CLIP variants (ViT-L/14, OpenCLIP) and datasets (ImageNet)
+Some modifications 
+=================
+- Reduced logistic regression iterations: 1000 → 100 (10x faster)
+- Sample size for prompt engineering: 200 images 
 
 
-CONCLUSION
 ==========
 This project successfully demonstrated CLIP's effectiveness for zero-shot and 
 linear probe classification. Key findings:
-• Descriptive prompts with specific attributes reduce accuracy as it changes the contextual embeddings of the transformer
+• Descriptive prompts with specific attributes improve accuracy as it provides more context
